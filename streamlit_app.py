@@ -2,17 +2,19 @@ import streamlit as st
 import pickle
 import requests
 
-movies = pickle.load(open('movies.pkl','rb'))
+movies = pickle.load(open('movies.pkl', 'rb'))
 movies_list = movies['title'].values
 
-similarity = pickle.load(open('similarity.pkl','rb'))
+similarity = pickle.load(open('similarity.pkl', 'rb'))
+
 
 def fetch_poster(movie_id):
-
     response = requests.get('https://api.themoviedb.org/3/movie/{}?api_key=35551ce8318af74a8b0d9856acabfb7a'.format(movie_id),verify=False)
     data = response.json()
-
-    return "https://image.tmdb.org/t/p/original/"+data['poster_path']
+    if data['poster_path']:
+        return "https://image.tmdb.org/t/p/original/"+data['poster_path']
+    else:
+        return "default.jpg"
 
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
@@ -25,6 +27,7 @@ def recommend(movie):
         recommended_list.append(movies.iloc[i[0]].title)
         recommended_movies_poster.append(fetch_poster(movie_id))
     return recommended_list, recommended_movies_poster
+
 
 st.title('Movie Recommender System')
 
@@ -53,4 +56,3 @@ if st.button('Recommended'):
     with col5:
         st.text(names[4])
         st.image(posters[4])
-
